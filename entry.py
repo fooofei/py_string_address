@@ -3,16 +3,12 @@
 import os
 import datetime
 import sys
-
+import ctypes
 
 curpath = os.path.dirname(os.path.realpath(__file__))
 
-
-
-
 def entry():
 
-    sys.path.append(os.path.join(curpath,'./Debug'))
 
     import string_address
     x ="hello"
@@ -25,6 +21,7 @@ def entry():
     print (r)
 
     raw_input('')
+
 
 
 if __name__ == '__main__':

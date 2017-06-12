@@ -93,9 +93,21 @@ static PyMethodDef methods[] = {
 {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+#ifdef WIN32
+
 PyMODINIT_FUNC
 initstring_address(void)
 {
     PyObject * r = Py_InitModule("string_address"
-        , methods);
+        , methods);
+
 }
+#else
+PyMODINIT_FUNC
+initlibstring_address(void)
+{
+    PyObject * r = Py_InitModule("libstring_address"
+            , methods);
+
+}
+#endif

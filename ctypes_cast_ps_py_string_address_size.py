@@ -17,7 +17,6 @@ import os
 import sys
 
 curpath = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(curpath, './Debug'))
 
 
 
@@ -45,7 +44,10 @@ cffi_address_of = lambda v: ffi.addressof(ffi.from_buffer(v))
 
 
 def c_bytes_string_address(v):
-    import string_address
+    if sys.platform.startswith('win32'):
+        import string_address
+    else:
+        import libstring_address as string_address
     r = string_address.PyString_AddressSize(v)
     assert (r)
     assert (r[1] == len(v))
@@ -53,7 +55,10 @@ def c_bytes_string_address(v):
 
 
 def c_unicode_string_address(v):
-    import string_address
+    if sys.platform.startswith('win32'):
+        import string_address
+    else:
+        import libstring_address as string_address
     r = string_address.PyUnicodeString_AddressSize(v)
     assert (r)
     assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
@@ -90,8 +95,13 @@ def pass_unicode_string():
     v = u'测试helloworld'
 
     addr1 = bytes_string_address(v)
+    print ('pass_unicode_string: bytes_string_address ctypes cast = {}'.format(hex(addr1.value)))
+
+    import pdb
+    pdb.set_trace()
 
     addr4 = c_unicode_string_address(v)
+    print ('pass_unicode_string: c_unicode_string_address c module = {}'.format(hex(addr4)))
 
     assert (addr1.value
             ==addr4 )
