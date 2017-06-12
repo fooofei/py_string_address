@@ -8,7 +8,7 @@ compare ways to get buffer in PyStringObject/PyUnicodeobject object field addres
 ```python
 ctypes.cast(obj, ctypes.c_void_p).value
 
-use both in PyStringObject and PyUnicodeObject
+use both for PyStringObject and PyUnicodeObject
 
 ```
 
@@ -18,7 +18,7 @@ use both in PyStringObject and PyUnicodeObject
 ```python
 cffi_address_of = lambda v: ffi.addressof(ffi.from_buffer(v))
 
-use in PyStringObject, there still no way to get address for PyUnicodeObject
+use for PyStringObject, there still no way to get address for PyUnicodeObject
 
 ```
 
