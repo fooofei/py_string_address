@@ -35,7 +35,7 @@ def c_unicode_string_address(v):
     else:
         import libstring_address as string_address
     r = string_address.PyUnicodeString_AddressSize(v)
-    assert (r)
+    if r is None: return 0
     assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
     return r[0]
 
@@ -46,7 +46,7 @@ def c_unicode_string_address_force(v):
     else:
         import libstring_address as string_address
     r = string_address.PyUnicodeString_AddressSizeForce(v)
-    assert (r)
+    assert (r is not None)
     #assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
     return r
 
@@ -167,6 +167,27 @@ Output :
 '''
 
 
+def assert_bytes_string_address(addrs,  v):
+    from functools import partial
+    b = all(addrs[0]== e for e in addrs)
+    assert (b)
+
+    string_at = partial(ctypes.string_at,size=len(v))
+    values = map(string_at,addrs)
+    b = all(values[0] == e for e in values)
+    assert (b)
+
+def assert_unicode_string_address(addrs,  v):
+    from functools import partial
+    b = all(addrs[0]== e for e in addrs)
+    assert (b)
+
+    string_at = partial(ctypes.wstring_at,size=len(v))
+    values = map(string_at,addrs)
+    b = all(values[0] == e for e in values)
+    assert (b)
+
+
 
 def pass_bytes_string():
     from ctypes import string_at
@@ -183,13 +204,14 @@ def pass_bytes_string():
         ,hex(ctypes_api_addr)
     ))
 
-    assert (cffi_addr == c_addr == ctypes_api_addr)
+    addrs = [
+        c_addr,
+        ctypes_api_addr
+    ]
+    if not(cffi_addr ==0):
+        addrs.append(cffi_addr)
 
-    assert (v
-            == string_at(c_addr, len(v))
-            == string_at(cffi_addr, len(v))
-            == string_at(ctypes_api_addr, len(v))
-            )
+    assert_bytes_string_address(addrs,v)
 
     print ('pass bytes_string')
 
@@ -206,18 +228,15 @@ def pass_unicode_string():
     print ('unicode_string-> c_addr_force addr={} size={}'.format(hex(c_addr_force),c_addr_force_size))
     print ('unicode_string-> sizeof(Py_UNICODE)={}'.format(c_unicode_string_address_unicode_type_size()))
 
-    if not(ctypes_api_addr==0) and c_addr is not None:
+    if not(ctypes_api_addr==0) and not(c_addr ==0):
         print ('unicode_string-> c_addr={} ctypes_api_addr={}'.format(
             hex(c_addr)
             , hex(ctypes_api_addr)
         ))
-
-        assert (c_addr == ctypes_api_addr)
-
-        assert (v
-                == wstring_at(c_addr, len(v))
-                == wstring_at(ctypes_api_addr, len(v)))
-
+        assert_unicode_string_address(
+            [c_addr,ctypes_api_addr]
+            ,v
+        )
         print ('pass unicode_string')
 
     else:

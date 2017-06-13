@@ -63,11 +63,15 @@ PyUnicodeString_AddressSizeForce(PyObject * self, PyObject * args)
     //r = PyArg_ParseTuple(args, "U", &unicode_string);
     r = PyArg_ParseTuple(args, "O", &unicode_string);
     if (0 == r) {
+        printf("error PyArg_ParseTuple\n");
+        fflush(stdout);
         Py_INCREF(Py_None);
         return Py_None;
     }
 
     if (!PyUnicode_Check(unicode_string)) {
+        printf("error PyUnicode_Check\n");
+        fflush(stdout);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -78,6 +82,8 @@ PyUnicodeString_AddressSizeForce(PyObject * self, PyObject * args)
     o_r = Py_BuildValue("(k,n)", (const void*)ptr, size);
 
     if (NULL == o_r) {
+        printf("error Py_BuildValue\n");
+        fflush(stdout);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -138,7 +144,7 @@ PyUnicodeString_GetUnicodeTypeSize(PyObject *, PyObject *)
 static PyMethodDef methods[] = {
     { "PyString_AddressSize",  PyString_AddressSize, METH_VARARGS, "Get the string buffer address and size of PyStringObject" },
     { "PyUnicodeString_AddressSize",  PyUnicodeString_AddressSize, METH_VARARGS, "Get the string buffer address and size of PyUnicodeObject" },
-    { "PyUnicodeString_AddressSizeForce",  PyUnicodeString_AddressSize, METH_VARARGS, "Get the string buffer address and size of PyUnicodeObject Force, Even if sizeof(wchar_t)!=sizeof(Py_UNICODE)" },
+    { "PyUnicodeString_AddressSizeForce",  PyUnicodeString_AddressSizeForce, METH_VARARGS, "Get the string buffer address and size of PyUnicodeObject Force, Even if sizeof(wchar_t)!=sizeof(Py_UNICODE)" },
     {"PyUnicodeString_GetUnicodeTypeSize",  PyUnicodeString_GetUnicodeTypeSize, METH_NOARGS, "get the sizeof(Py_UNICODE)"},
 {NULL, NULL, 0, NULL}        /* Sentinel */
 };

@@ -12,6 +12,13 @@ endif ()
 set(PY_DEV_INCLUDE )
 set(PY_DEV_LIBS )
 
+# Query Python Env in macOS
+# $python-config --includes
+# -I/usr/include/python2.6 -I/usr/include/python2.6
+# $python-config --ldflags
+# -lpthread -ldl -lutil -lm -lpython2.6
+
+
 # UNIX  APPLE
 if(WIN32)
     set(PY_DEV_INCLUDE ${CMAKE_SOURCE_DIR}/python_dev/include)
@@ -20,8 +27,6 @@ if(WIN32)
 else()
     set(PY_DEV_INCLUDE /usr/include/python2.7)
     set(PY_DEV_LIBS )
-
-
 endif()
 
 
@@ -31,8 +36,14 @@ add_library(string_address SHARED main.cpp)
 
 if(WIN32)
 target_link_libraries(string_address python27)
-set_target_properties(string_address PROPERTIES SUFFIX ".pyd")
+#set_target_properties(string_address PROPERTIES SUFFIX ".pyd")
+# same with
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".pyd")
+elseif(APPLE)
+target_link_libraries(string_address python2.7)
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".so") # Python call .so in macOS,not .dylib
 endif()
+
 add_custom_command(
         TARGET string_address POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:string_address> ../$<TARGET_FILE_NAME:string_address>
