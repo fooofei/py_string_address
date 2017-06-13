@@ -1,4 +1,4 @@
-# py_string_address
+# py_string_address [![Build Status](https://travis-ci.org/fooofei/py_string_address.svg?branch=master)](https://travis-ci.org/fooofei/py_string_address)
 
 compare ways to get buffer in PyStringObject/PyUnicodeobject object field address.
 
