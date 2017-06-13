@@ -40,3 +40,9 @@ use `ctypes.pythonapi.PyString_AsString` for `PyStringObject`,
 use `ctypes.pythonapi.PyUnicodeUCS2_AsUnicode` in win32 or `ctypes.pythonapi.PyUnicodeUCS4_AsUnicode` in linux for `PyUnicodeObject`. 
 
 
+
+### Platforms 
+
+python2
+
+win32, linux, macOS
