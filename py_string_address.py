@@ -39,6 +39,24 @@ def c_unicode_string_address(v):
     assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
     return r[0]
 
+
+def c_unicode_string_address_force(v):
+    if sys.platform.startswith('win32'):
+        import string_address
+    else:
+        import libstring_address as string_address
+    r = string_address.PyUnicodeString_AddressSizeForce(v)
+    assert (r)
+    #assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
+    return r
+
+def c_unicode_string_address_unicode_type_size():
+    if sys.platform.startswith('win32'):
+        import string_address
+    else:
+        import libstring_address as string_address
+    return string_address.PyUnicodeString_GetUnicodeTypeSize()
+
 ###
 
 
@@ -49,6 +67,22 @@ def ctypes_api_pyssize_t():
         return ctypes.c_int64
     else:
         raise TypeError("Cannot determine type of Py_ssize_t")
+
+def _ctypes_api_unicode_string_address_api():
+    '''
+    Can be error:
+        AttributeError: python: undefined symbol: PyUnicodeUCS2_AsUnicode
+    '''
+    py_unicode_size = ctypes.sizeof(ctypes.c_wchar)
+    if py_unicode_size == 2:
+        f = ctypes.pythonapi.PyUnicodeUCS2_AsUnicode
+    elif py_unicode_size == 4:
+        f = ctypes.pythonapi.PyUnicodeUCS4_AsUnicode
+    else:
+        raise TypeError("Cannot determine wchar_t size")
+    f.restype = ctypes.c_void_p
+    f.argtypes = [ctypes.py_object]
+    return f
 
 def ctypes_api_bytes_string_addr(v):
     '''
@@ -66,17 +100,25 @@ def ctypes_api_bytes_string_addr(v):
     return f(v)
 
 def ctypes_api_unicode_string_addr(v):
-    # f = ctypes.pythonapi.PyUnicode_AsUnicode
-    py_unicode_size = ctypes.sizeof(ctypes.c_wchar)
-    if py_unicode_size == 2:
-        f = ctypes.pythonapi.PyUnicodeUCS2_AsUnicode
-    elif py_unicode_size==4:
-        f = ctypes.pythonapi.PyUnicodeUCS4_AsUnicode
-    else:
-        raise TypeError("Cannot determine wchar_t size")
-    f.restype = ctypes.c_void_p
-    f.argtypes = [ctypes.py_object]
-    return f(v)
+    '''
+    !!!WARNING not always success
+
+    1 Python redefine api PyUnicode_* as PyUnicodeUCS2_* or PyUnicodeUCS4_*,
+     so we see the source code is PyUnicode_* , but through ida the lib binary,
+     we only find PyUnicodeUCS2_* or PyUnicodeUCS4_*.
+
+    2 Python says, use PyUnicode_FromWideChar/PyUnicode_AsWideChar to support Platform wchar_t.
+
+    3 PyUnicode_FromWideChar/PyUnicode_AsWideChar will copy buffer, which will use external memory.
+
+    4 If the platform sizeof(wchar_t)==4, it can aslo maybe use PyUnicodeUCS2_* apis, by this, we cannot
+       get the internal buffer address.
+    '''
+
+    try:
+        return _ctypes_api_unicode_string_address_api()(v)
+    except (TypeError,AttributeError) as er:
+        return 0
 
 
 def cffi_bytes_string_addr(v):
@@ -135,7 +177,7 @@ def pass_bytes_string():
     cffi_addr = _cffi_bytes_string_addr(v)
     ctypes_api_addr = ctypes_api_bytes_string_addr(v)
 
-    print ('pass_bytes_string-> c_addr={} cffi_addr={} ctypes_api_addr={}'.format(
+    print ('bytes_string-> c_addr={} cffi_addr={} ctypes_api_addr={}'.format(
         hex(c_addr)
         ,hex(cffi_addr)
         ,hex(ctypes_api_addr)
@@ -159,20 +201,28 @@ def pass_unicode_string():
 
     c_addr = c_unicode_string_address(v)
     ctypes_api_addr = ctypes_api_unicode_string_addr(v)
+    c_addr_force,c_addr_force_size = c_unicode_string_address_force(v)
 
+    print ('unicode_string-> c_addr_force addr={} size={}'.format(hex(c_addr_force),c_addr_force_size))
+    print ('unicode_string-> sizeof(Py_UNICODE)={}'.format(c_unicode_string_address_unicode_type_size()))
 
-    print ('pass_unicode_string-> c_addr={} ctypes_api_addr={}'.format(
-        hex(c_addr)
-        ,hex(ctypes_api_addr)
-    ))
+    if not(ctypes_api_addr==0) and c_addr is not None:
+        print ('unicode_string-> c_addr={} ctypes_api_addr={}'.format(
+            hex(c_addr)
+            , hex(ctypes_api_addr)
+        ))
 
-    assert (c_addr == ctypes_api_addr)
+        assert (c_addr == ctypes_api_addr)
 
-    assert (v
-            == wstring_at(c_addr, len(v))
-            == wstring_at(ctypes_api_addr, len(v)))
+        assert (v
+                == wstring_at(c_addr, len(v))
+                == wstring_at(ctypes_api_addr, len(v)))
 
-    print ('pass unicode_string')
+        print ('pass unicode_string')
+
+    else:
+        print ('unicode_string-> c_addr={} ctypes_api_addr={}'.format(c_addr,ctypes_api_addr))
+        print ('fail unicode_string')
 
 
 

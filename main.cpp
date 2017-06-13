@@ -50,7 +50,7 @@ PyString_AddressSize(PyObject * self, PyObject * args)
 }
 
 static PyObject *
-PyUnicodeString_AddressSize(PyObject * self, PyObject * args)
+PyUnicodeString_AddressSizeForce(PyObject * self, PyObject * args)
 {
     int r;
     const char * ptr = NULL;
@@ -84,12 +84,62 @@ PyUnicodeString_AddressSize(PyObject * self, PyObject * args)
     return o_r;
 }
 
+static PyObject *
+PyUnicodeString_AddressSize(PyObject * self, PyObject * args)
+{
+    int r;
+    const char * ptr = NULL;
+    PyObject * unicode_string = NULL;
+    Py_ssize_t size = 0;
+    PyObject * o_r = NULL;
+
+
+    // same address
+    //r = PyArg_ParseTuple(args, "U", &unicode_string);
+    r = PyArg_ParseTuple(args, "O", &unicode_string);
+    if (0 == r) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    if (!PyUnicode_Check(unicode_string)) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+    if (sizeof(Py_UNICODE) != sizeof(wchar_t)) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+
+
+    size = PyUnicode_GET_DATA_SIZE(unicode_string);
+    ptr = PyUnicode_AS_DATA(unicode_string);
+
+    o_r = Py_BuildValue("(k,n)", (const void*)ptr, size);
+
+    if (NULL == o_r) {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+    return o_r;
+}
+
+static PyObject *
+PyUnicodeString_GetUnicodeTypeSize(PyObject *, PyObject *)
+{
+
+    return Py_BuildValue("n",sizeof(Py_UNICODE));
+}
+
 
 
 
 static PyMethodDef methods[] = {
     { "PyString_AddressSize",  PyString_AddressSize, METH_VARARGS, "Get the string buffer address and size of PyStringObject" },
-    {"PyUnicodeString_AddressSize",  PyUnicodeString_AddressSize, METH_VARARGS, "Get the string buffer address and size of PyUnicodeObject"},
+    { "PyUnicodeString_AddressSize",  PyUnicodeString_AddressSize, METH_VARARGS, "Get the string buffer address and size of PyUnicodeObject" },
+    { "PyUnicodeString_AddressSizeForce",  PyUnicodeString_AddressSize, METH_VARARGS, "Get the string buffer address and size of PyUnicodeObject Force, Even if sizeof(wchar_t)!=sizeof(Py_UNICODE)" },
+    {"PyUnicodeString_GetUnicodeTypeSize",  PyUnicodeString_GetUnicodeTypeSize, METH_NOARGS, "get the sizeof(Py_UNICODE)"},
 {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
