@@ -26,6 +26,8 @@ if(WIN32)
     link_directories(${PY_DEV_LIBS})
 else()
     set(PY_DEV_INCLUDE /usr/include/python2.7)
+    # macOS also work
+    # set(PY_DEV_INCLUDE /usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/include/python2.7)
     set(PY_DEV_LIBS )
 endif()
 
@@ -40,7 +42,10 @@ target_link_libraries(string_address python27)
 # same with
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".pyd")
 elseif(APPLE)
-target_link_libraries(string_address python2.7)
+
+target_link_libraries(string_address "/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/Python")
+#target_link_libraries(string_address "-lpython2.7") # will crash
+#target_link_libraries(string_address "-lpython") # will crash
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".so") # Python call .so in macOS,not .dylib
 endif()
 
