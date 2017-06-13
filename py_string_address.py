@@ -147,12 +147,12 @@ def foo1():
     bytes_string_addr1 = ctypes_cast_bytes_string_addr(bytes_string)
     bytes_string_addr2 = c_bytes_string_address(bytes_string)
 
-    print ('bytes_string address 1 {} 2 {}'.format(hex(bytes_string_addr1), hex(bytes_string_addr2)))
+    print ('bytes_string address 1 {0} 2 {1}'.format(hex(bytes_string_addr1), hex(bytes_string_addr2)))
 
     unicode_string_addr1 = ctypes_cast_bytes_string_addr(unicode_string)
     unicode_string_addr2 = c_unicode_string_address(unicode_string)
 
-    print ('unicode_string address 1 {} 2 {}'.format(hex(unicode_string_addr1), hex(unicode_string_addr2)))
+    print ('unicode_string address 1 {0} 2 {1}'.format(hex(unicode_string_addr1), hex(unicode_string_addr2)))
 
 '''
 Output : 
@@ -198,7 +198,7 @@ def pass_bytes_string():
     cffi_addr = _cffi_bytes_string_addr(v)
     ctypes_api_addr = ctypes_api_bytes_string_addr(v)
 
-    print ('bytes_string-> c_addr={} cffi_addr={} ctypes_api_addr={}'.format(
+    print ('bytes_string-> c_addr={0} cffi_addr={1} ctypes_api_addr={2}'.format(
         hex(c_addr)
         ,hex(cffi_addr)
         ,hex(ctypes_api_addr)
@@ -225,11 +225,11 @@ def pass_unicode_string():
     ctypes_api_addr = ctypes_api_unicode_string_addr(v)
     c_addr_force,c_addr_force_size = c_unicode_string_address_force(v)
 
-    print ('unicode_string-> c_addr_force addr={} size={}'.format(hex(c_addr_force),c_addr_force_size))
-    print ('unicode_string-> sizeof(Py_UNICODE)={}'.format(c_unicode_string_address_unicode_type_size()))
+    print ('unicode_string-> c_addr_force addr={0} size={1}'.format(hex(c_addr_force),c_addr_force_size))
+    print ('unicode_string-> sizeof(Py_UNICODE)={0}'.format(c_unicode_string_address_unicode_type_size()))
 
     if not(ctypes_api_addr==0) and not(c_addr ==0):
-        print ('unicode_string-> c_addr={} ctypes_api_addr={}'.format(
+        print ('unicode_string-> c_addr={0} ctypes_api_addr={1}'.format(
             hex(c_addr)
             , hex(ctypes_api_addr)
         ))
@@ -240,7 +240,7 @@ def pass_unicode_string():
         print ('pass unicode_string')
 
     else:
-        print ('unicode_string-> c_addr={} ctypes_api_addr={}'.format(c_addr,ctypes_api_addr))
+        print ('unicode_string-> c_addr={0} ctypes_api_addr={1}'.format(c_addr,ctypes_api_addr))
         print ('fail unicode_string')
 
 
