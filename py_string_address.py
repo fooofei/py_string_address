@@ -116,7 +116,7 @@ def ctypes_api_unicode_string_addr(v):
 
     3 PyUnicode_FromWideChar/PyUnicode_AsWideChar will copy buffer, which will use external memory.
 
-    4 If the platform sizeof(wchar_t)==4, it can aslo maybe use PyUnicodeUCS2_* apis, by this, we cannot
+    4 If the platform sizeof(wchar_t)==4, it can also maybe use PyUnicodeUCS2_* apis, by this, we cannot
        get the internal buffer address.
     '''
 
