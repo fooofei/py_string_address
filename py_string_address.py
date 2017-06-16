@@ -1,4 +1,4 @@
-﻿#coding=utf-8
+﻿# coding=utf-8
 
 '''
 
@@ -11,11 +11,11 @@ import os
 import sys
 
 
-
 ###
 def ctypes_cast_bytes_string_addr(v):
     ''' !!!Risk, not use  see issue I report http://bugs.python.org/issue30634'''
-    return ctypes.cast(v,ctypes.c_void_p).value
+    return ctypes.cast(v, ctypes.c_void_p).value
+
 
 ###
 def c_bytes_string_address(v):
@@ -36,7 +36,7 @@ def c_unicode_string_address(v):
         import libstring_address as string_address
     r = string_address.PyUnicodeString_AddressSize(v)
     if r is None: return 0
-    assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
+    assert (r[1] == len(v) * ctypes.sizeof(ctypes.c_wchar))
     return r[0]
 
 
@@ -47,8 +47,9 @@ def c_unicode_string_address_force(v):
         import libstring_address as string_address
     r = string_address.PyUnicodeString_AddressSizeForce(v)
     assert (r is not None)
-    #assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
+    # assert (r[1] == len(v)*ctypes.sizeof(ctypes.c_wchar))
     return r
+
 
 def c_unicode_string_address_unicode_type_size():
     if sys.platform.startswith('win32'):
@@ -56,6 +57,7 @@ def c_unicode_string_address_unicode_type_size():
     else:
         import libstring_address as string_address
     return string_address.PyUnicodeString_GetUnicodeTypeSize()
+
 
 ###
 
@@ -67,6 +69,7 @@ def ctypes_api_pyssize_t():
         return ctypes.c_int64
     else:
         raise TypeError("Cannot determine type of Py_ssize_t")
+
 
 def _ctypes_api_unicode_string_address_api():
     '''
@@ -84,6 +87,7 @@ def _ctypes_api_unicode_string_address_api():
     f.argtypes = [ctypes.py_object]
     return f
 
+
 def ctypes_api_bytes_string_addr(v):
     '''
     one way :
@@ -98,6 +102,7 @@ def ctypes_api_bytes_string_addr(v):
     f.restype = ctypes.c_void_p
     f.argtypes = [ctypes.py_object]
     return f(v)
+
 
 def ctypes_api_unicode_string_addr(v):
     '''
@@ -117,16 +122,17 @@ def ctypes_api_unicode_string_addr(v):
 
     try:
         return _ctypes_api_unicode_string_address_api()(v)
-    except (TypeError,AttributeError) as er:
+    except (TypeError, AttributeError) as er:
         return 0
 
 
 def cffi_bytes_string_addr(v):
     import cffi
     ffi = cffi.FFI()
-    x= ffi.addressof(ffi.from_buffer(v))
-    x = ffi.cast('uintptr_t',x)
+    x = ffi.addressof(ffi.from_buffer(v))
+    x = ffi.cast('uintptr_t', x)
     return int(x)
+
 
 def _cffi_bytes_string_addr(v):
     try:
@@ -135,14 +141,54 @@ def _cffi_bytes_string_addr(v):
         return 0
 
 
-def foo1():
+import unittest
+
+
+class MyTestCase(unittest.TestCase):
+    def test_address_of_bytes_string(self):
+        v = 'helloworld'
+
+        c_addr = c_bytes_string_address(v)
+        cffi_addr = _cffi_bytes_string_addr(v)
+        ctypes_api_addr = ctypes_api_bytes_string_addr(v)
+
+        msg = 'bytes_string-> c_addr={0} cffi_addr={1} ctypes_api_addr={2}'.format(
+            hex(c_addr)
+            , hex(cffi_addr)
+            , hex(ctypes_api_addr)
+        )
+
+        self.assertTrue(assert_bytes_string_address(
+            [c_addr, cffi_addr, ctypes_api_addr]
+            , v
+        )
+            , msg=msg)
+
+    def test_address_of_unicode_string(self):
+        v = u'测试helloworld'
+
+        c_addr = c_unicode_string_address(v)
+        ctypes_api_addr = ctypes_api_unicode_string_addr(v)
+        c_addr_force, c_addr_force_size = c_unicode_string_address_force(v)
+
+        print ('\nunicode_string-> c_addr_force addr={0} size={1}'.format(hex(c_addr_force), c_addr_force_size))
+        print ('\nunicode_string-> sizeof(Py_UNICODE)={0}'.format(c_unicode_string_address_unicode_type_size()))
+
+        msg = 'unicode_string-> c_addr={0} ctypes_api_addr={1}'.format(c_addr, ctypes_api_addr)
+
+        self.assertTrue(assert_unicode_string_address(
+            [c_addr, ctypes_api_addr]
+            , v
+        ), msg=msg)
+
+
+def error_sample():
     '''
     It's error, we cannot use ctypes.cast to bytes string or unicode string
     '''
 
     bytes_string = 'helloworld'
     unicode_string = u'helloworld'
-    unicode_string2 = u'测试中文'
 
     bytes_string_addr1 = ctypes_cast_bytes_string_addr(bytes_string)
     bytes_string_addr2 = c_bytes_string_address(bytes_string)
@@ -153,6 +199,7 @@ def foo1():
     unicode_string_addr2 = c_unicode_string_address(unicode_string)
 
     print ('unicode_string address 1 {0} 2 {1}'.format(hex(unicode_string_addr1), hex(unicode_string_addr2)))
+
 
 '''
 Output : 
@@ -167,87 +214,28 @@ Output :
 '''
 
 
-def assert_bytes_string_address(addrs,  v):
+def assert_bytes_string_address(addrs, v):
     from functools import partial
-    b = all(addrs[0]== e for e in addrs)
-    assert (b)
+    b = all(addrs[0] == e for e in addrs)
+    if not b: return b
 
-    string_at = partial(ctypes.string_at,size=len(v))
-    values = map(string_at,addrs)
+    string_at = partial(ctypes.string_at, size=len(v))
+    values = map(string_at, addrs)
     b = all(values[0] == e for e in values)
-    assert (b)
+    return b
 
-def assert_unicode_string_address(addrs,  v):
+
+def assert_unicode_string_address(addrs, v):
     from functools import partial
-    b = all(addrs[0]== e for e in addrs)
-    assert (b)
+    b = all(addrs[0] == e for e in addrs)
+    if not b: return b
 
-    string_at = partial(ctypes.wstring_at,size=len(v))
-    values = map(string_at,addrs)
+    string_at = partial(ctypes.wstring_at, size=len(v))
+    values = map(string_at, addrs)
     b = all(values[0] == e for e in values)
-    assert (b)
+    return b
 
-
-
-def pass_bytes_string():
-    from ctypes import string_at
-
-    v = 'helloworld'
-
-    c_addr = c_bytes_string_address(v)
-    cffi_addr = _cffi_bytes_string_addr(v)
-    ctypes_api_addr = ctypes_api_bytes_string_addr(v)
-
-    print ('bytes_string-> c_addr={0} cffi_addr={1} ctypes_api_addr={2}'.format(
-        hex(c_addr)
-        ,hex(cffi_addr)
-        ,hex(ctypes_api_addr)
-    ))
-
-    addrs = [
-        c_addr,
-        ctypes_api_addr
-    ]
-    if not(cffi_addr ==0):
-        addrs.append(cffi_addr)
-
-    assert_bytes_string_address(addrs,v)
-
-    print ('pass bytes_string')
-
-
-def pass_unicode_string():
-    from ctypes import wstring_at
-    v = u'测试helloworld'
-
-
-    c_addr = c_unicode_string_address(v)
-    ctypes_api_addr = ctypes_api_unicode_string_addr(v)
-    c_addr_force,c_addr_force_size = c_unicode_string_address_force(v)
-
-    print ('unicode_string-> c_addr_force addr={0} size={1}'.format(hex(c_addr_force),c_addr_force_size))
-    print ('unicode_string-> sizeof(Py_UNICODE)={0}'.format(c_unicode_string_address_unicode_type_size()))
-
-    if not(ctypes_api_addr==0) and not(c_addr ==0):
-        print ('unicode_string-> c_addr={0} ctypes_api_addr={1}'.format(
-            hex(c_addr)
-            , hex(ctypes_api_addr)
-        ))
-        assert_unicode_string_address(
-            [c_addr,ctypes_api_addr]
-            ,v
-        )
-        print ('pass unicode_string')
-
-    else:
-        print ('unicode_string-> c_addr={0} ctypes_api_addr={1}'.format(c_addr,ctypes_api_addr))
-        print ('fail unicode_string')
-
-
-
-def entry():
-    pass_bytes_string()
-    pass_unicode_string()
 
 if __name__ == '__main__':
-    entry()
+    suite = unittest.TestLoader().loadTestsFromTestCase(MyTestCase)
+    unittest.TextTestRunner(verbosity=3).run(suite)
