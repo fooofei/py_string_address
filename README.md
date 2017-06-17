@@ -17,7 +17,9 @@ see the issue I report http://bugs.python.org/issue30634
 ### use cffi
 
 ```python
-cffi_address_of = lambda v: ffi.addressof(ffi.from_buffer(v))
+v = 'helloworld'
+addr = ffi.from_buffer(v)
+addr = ffi.cast('uintptr_t',addr)
 ```
 
 use for `PyStringObject`, there still no way to get address for `PyUnicodeObject` until cffi the Release version of 1.10.

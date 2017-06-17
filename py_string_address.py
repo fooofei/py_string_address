@@ -129,7 +129,7 @@ def ctypes_api_unicode_string_addr(v):
 def cffi_bytes_string_addr(v):
     import cffi
     ffi = cffi.FFI()
-    x = ffi.addressof(ffi.from_buffer(v))
+    x = ffi.from_buffer(v)
     x = ffi.cast('uintptr_t', x)
     return int(x)
 
