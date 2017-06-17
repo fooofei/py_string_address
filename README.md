@@ -19,7 +19,7 @@ see the issue I report http://bugs.python.org/issue30634
 ```python
 v = 'helloworld'
 addr = ffi.from_buffer(v)
-addr = ffi.cast('uintptr_t',addr)
+addr = int(ffi.cast('uintptr_t',addr))
 ```
 
 use for `PyStringObject`, there still no way to get address for `PyUnicodeObject` until cffi the Release version of 1.10.
