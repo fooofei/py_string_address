@@ -12,40 +12,46 @@ endif ()
 set(PY_DEV_INCLUDE )
 set(PY_DEV_LIBS )
 
-# Query Python Env in macOS
-# $python-config --includes
-# -I/usr/include/python2.6 -I/usr/include/python2.6
-# $python-config --ldflags
-# -lpthread -ldl -lutil -lm -lpython2.6
-
-
 # UNIX  APPLE
 if(WIN32)
-    set(PY_DEV_INCLUDE ${CMAKE_SOURCE_DIR}/python_dev/include)
-    set(PY_DEV_LIBS ${CMAKE_SOURCE_DIR}/python_dev/libs)
-    link_directories(${PY_DEV_LIBS})
+    set(MY_PYTHON_INCLUDE ${CMAKE_SOURCE_DIR}/python_dev/include)
+    set(MY_PYTHON_LIBS ${CMAKE_SOURCE_DIR}/python_dev/libs)
+    set(MY_PYTHON_LIB python27)
+
 else()
-    set(PY_DEV_INCLUDE /usr/include/python2.7)
-    # macOS also work
-    # set(PY_DEV_INCLUDE /usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/include/python2.7)
-    set(PY_DEV_LIBS )
+
+    # find_package() not work
+    # find_package(PythonInterp ) # PYTHON_VERSION_STRING PYTHON_EXECUTABLE
+    # find_package(PythonLibs ) # PYTHON_LIBRARIES PYTHON_INCLUDE_PATH
+    execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE MY_PYTHON_HOME)
+    string(STRIP ${MY_PYTHON_HOME} MY_PYTHON_HOME)
+    message(STATUS "MY_PYTHON_HOME=" "${MY_PYTHON_HOME}")
+    set(MY_PYTHON_INCLUDE ${MY_PYTHON_HOME}/include/python2.7)
+    set(MY_PYTHON_LIBS ${MY_PYTHON_HOME}/lib )
+    set(MY_PYTHON_LIB ${MY_PYTHON_LIBS}/libpython2.7.dylib)
 endif()
+# In pyenv, install python with env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 2.7.13
+# >>> import sysconfig
+# >>> sysconfig.get_config_var('LIBS')
+# '-lpthread -ldl  -lutil'
+# >>> sysconfig.get_config_var('LINKFORSHARED')
+# '-Xlinker -export-dynamic'
 
+message(STATUS "MY_PYTHON_INCLUDE=" "${MY_PYTHON_INCLUDE}")
+message(STATUS "MY_PYTHON_LIBS=" "${MY_PYTHON_LIBS}")
+message(STATUS "MY_PYTHON_LIB=" "${MY_PYTHON_LIB}")
 
-
-include_directories(${PY_DEV_INCLUDE})
+include_directories(${MY_PYTHON_INCLUDE})
+link_directories(${MY_PYTHON_LIBS}) # macOS use this
 add_library(string_address SHARED main.cpp)
+target_link_libraries(string_address python2.7)
 
 if(WIN32)
-target_link_libraries(string_address python27)
+
 #set_target_properties(string_address PROPERTIES SUFFIX ".pyd")
 # same with
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".pyd")
 elseif(APPLE)
-
-target_link_libraries(string_address "/usr/local/Cellar/python/2.7.13/Frameworks/Python.framework/Versions/2.7/Python")
-#target_link_libraries(string_address "-lpython2.7") # will crash
-#target_link_libraries(string_address "-lpython") # will crash
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".so") # Python call .so in macOS,not .dylib
 endif()
 
