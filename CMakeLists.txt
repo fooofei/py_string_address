@@ -29,7 +29,11 @@ else()
     message(STATUS "MY_PYTHON_HOME=" "${MY_PYTHON_HOME}")
     target_include_directories(${PROJECT_NAME} PRIVATE ${MY_PYTHON_HOME}/include/python2.7)
     #set(MY_PYTHON_LIB ${MY_PYTHON_LIBS}/libpython2.7.dylib)
-    target_link_libraries(${PROJECT_NAME}  ${MY_PYTHON_LIBS}python2.7)
+    if(APPLE)
+        target_link_libraries(${PROJECT_NAME}  ${MY_PYTHON_HOME}/lib/libpython2.7.dylib)
+    else()
+        target_link_libraries(${PROJECT_NAME} ${MY_PYTHON_HOME}/lib/python2.7)
+    endif()
 endif()
 # In pyenv, install python with env PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 2.7.13
 # >>> import sysconfig

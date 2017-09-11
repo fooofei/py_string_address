@@ -9,7 +9,11 @@ addons:
       - cmake
 
 python:
-  - "2.6"
+  #- "2.6" 
+  # hard to find python2.6
+  # have to switch two include path
+  # ${MY_PYTHON_HOME}/include/python2.7
+  # ${MY_PYTHON_HOME}/include/python2.6 
   - "2.7"
 # command to install dependencies
 install: "pip install -r requirements.txt"
