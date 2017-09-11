@@ -11,131 +11,135 @@
 //
 // missing Python27_d.lib http://blog.csdn.net/junparadox/article/details/52704287
 
-static PyObject *
+static 
+PyObject *
 PyString_AddressSize(PyObject * self, PyObject * args)
 {
-    int r;
-    char * ptr = NULL;
-    PyObject * string = NULL;
-    Py_ssize_t size = 0;
-    PyObject * o_r = NULL;
+  int r;
+  char * ptr = NULL;
+  PyObject * string = NULL;
+  Py_ssize_t size = 0;
+  PyObject * o_r = NULL;
 
-    // s = char **
-    // 
-    //r = PyArg_ParseTuple(args, "S", &string);
-    r = PyArg_ParseTuple(args, "O", &string);
-    if (0 == r) {
-        // error
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+  // s = char **
+  // 
+  //r = PyArg_ParseTuple(args, "S", &string);
+  r = PyArg_ParseTuple(args, "O", &string);
+  if (0 == r) {
+    // error
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    r = PyString_AsStringAndSize(string,&ptr, &size);
-    if (0 != r){
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+  r = PyString_AsStringAndSize(string, &ptr, &size);
+  if (0 != r) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    
-    // k = unsigned long, notice It must can be 64bit in Windows_x64 or linux x86_x64 platform.
-    // I = unsigned int
-    // n = py_ssize_t
-    o_r = Py_BuildValue("(k,n)",(const void*)ptr,size);
 
-    if (NULL == o_r) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    return o_r;
+  // k = unsigned long, notice It must can be 64bit in Windows_x64 or linux x86_x64 platform.
+  // I = unsigned int
+  // n = py_ssize_t
+  o_r = Py_BuildValue("(k,n)", (const void*)ptr, size);
+
+  if (NULL == o_r) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  return o_r;
 }
 
-static PyObject *
+static 
+PyObject *
 PyUnicodeString_AddressSizeForce(PyObject * self, PyObject * args)
 {
-    int r;
-    const char * ptr = NULL;
-    PyObject * unicode_string = NULL;
-    Py_ssize_t size = 0;
-    PyObject * o_r = NULL;
+  int r;
+  const char * ptr = NULL;
+  PyObject * unicode_string = NULL;
+  Py_ssize_t size = 0;
+  PyObject * o_r = NULL;
 
-       
-    // same address
-    //r = PyArg_ParseTuple(args, "U", &unicode_string);
-    r = PyArg_ParseTuple(args, "O", &unicode_string);
-    if (0 == r) {
-        printf("error PyArg_ParseTuple\n");
-        fflush(stdout);
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
 
-    if (!PyUnicode_Check(unicode_string)) {
-        printf("error PyUnicode_Check\n");
-        fflush(stdout);
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+  // same address
+  //r = PyArg_ParseTuple(args, "U", &unicode_string);
+  r = PyArg_ParseTuple(args, "O", &unicode_string);
+  if (0 == r) {
+    printf("error PyArg_ParseTuple\n");
+    fflush(stdout);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    size = PyUnicode_GET_DATA_SIZE(unicode_string);
-    ptr = PyUnicode_AS_DATA(unicode_string);
+  if (!PyUnicode_Check(unicode_string)) {
+    printf("error PyUnicode_Check\n");
+    fflush(stdout);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    o_r = Py_BuildValue("(k,n)", (const void*)ptr, size);
+  size = PyUnicode_GET_DATA_SIZE(unicode_string);
+  ptr = PyUnicode_AS_DATA(unicode_string);
 
-    if (NULL == o_r) {
-        printf("error Py_BuildValue\n");
-        fflush(stdout);
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    return o_r;
+  o_r = Py_BuildValue("(k,n)", (const void*)ptr, size);
+
+  if (NULL == o_r) {
+    printf("error Py_BuildValue\n");
+    fflush(stdout);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  return o_r;
 }
 
-static PyObject *
+static 
+PyObject *
 PyUnicodeString_AddressSize(PyObject * self, PyObject * args)
 {
-    int r;
-    const char * ptr = NULL;
-    PyObject * unicode_string = NULL;
-    Py_ssize_t size = 0;
-    PyObject * o_r = NULL;
+  int r;
+  const char * ptr = NULL;
+  PyObject * unicode_string = NULL;
+  Py_ssize_t size = 0;
+  PyObject * o_r = NULL;
 
 
-    // same address
-    //r = PyArg_ParseTuple(args, "U", &unicode_string);
-    r = PyArg_ParseTuple(args, "O", &unicode_string);
-    if (0 == r) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+  // same address
+  //r = PyArg_ParseTuple(args, "U", &unicode_string);
+  r = PyArg_ParseTuple(args, "O", &unicode_string);
+  if (0 == r) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    if (!PyUnicode_Check(unicode_string)) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+  if (!PyUnicode_Check(unicode_string)) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    if (sizeof(Py_UNICODE) != sizeof(wchar_t)) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
+  if (sizeof(Py_UNICODE) != sizeof(wchar_t)) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
 
-    size = PyUnicode_GET_DATA_SIZE(unicode_string);
-    ptr = PyUnicode_AS_DATA(unicode_string);
+  size = PyUnicode_GET_DATA_SIZE(unicode_string);
+  ptr = PyUnicode_AS_DATA(unicode_string);
 
-    o_r = Py_BuildValue("(k,n)", (const void*)ptr, size);
+  o_r = Py_BuildValue("(k,n)", (const void*)ptr, size);
 
-    if (NULL == o_r) {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    return o_r;
+  if (NULL == o_r) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  return o_r;
 }
 
-static PyObject *
+static 
+PyObject *
 PyUnicodeString_GetUnicodeTypeSize(PyObject *, PyObject *)
 {
 
-    return Py_BuildValue("n",sizeof(Py_UNICODE));
+  return Py_BuildValue("n", sizeof(Py_UNICODE));
 }
 
 
@@ -154,16 +158,16 @@ static PyMethodDef methods[] = {
 PyMODINIT_FUNC
 initstring_address(void)
 {
-    PyObject * r = Py_InitModule("string_address"
-        , methods);
+  PyObject * r = Py_InitModule("string_address"
+    , methods);
 
 }
 #else
 PyMODINIT_FUNC
 initlibstring_address(void)
 {
-    PyObject * r = Py_InitModule("libstring_address"
-            , methods);
+  PyObject * r = Py_InitModule("libstring_address"
+    , methods);
 
 }
 #endif
