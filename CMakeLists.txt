@@ -9,6 +9,10 @@ endif ()
 
 add_library(${PROJECT_NAME} SHARED main.cpp)
 
+# erase
+set(PY_DEV_INCLUDE )
+set(PY_DEV_LIBS )
+
 # UNIX  APPLE
 if(WIN32)
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/python_dev/include)
