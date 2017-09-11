@@ -38,9 +38,6 @@ endif()
 # >>> sysconfig.get_config_var('LINKFORSHARED')
 # '-Xlinker -export-dynamic'
 
-#target_link_libraries(${PROJECT_NAME} python2.7)
-
-
 
 if(WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".pyd")
